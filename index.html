@@ -197,6 +197,42 @@ body.hp{padding-bottom:200px}
 .jdots{display:flex;gap:6px}.jd{flex:1;height:6px;border-radius:99px;background:var(--line)}.jd.cur{background:var(--accent)}.jd.ok{background:var(--ok)}.jd.bad{background:var(--bad)}
 .why{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px}.why button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:99px;padding:4px 10px;font-size:13px;cursor:pointer}.why button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 
+/* PDF da aula (só aparece na impressão) */
+#pdfdoc{display:none}
+@page{margin:16mm}
+@media print{
+  body.printing{background:#fff!important;padding:0!important;margin:0!important}
+  body.printing>*:not(#pdfdoc){display:none!important}
+  body.printing #pdfdoc{display:block;color:#111;background:#fff;font:11.5pt/1.5 Georgia,'Times New Roman',serif;max-width:none}
+  #pdfdoc h1{font:700 22pt/1.15 Arial,sans-serif;margin:2pt 0 4pt}
+  #pdfdoc h2{font:700 14pt/1.2 Arial,sans-serif;margin:16pt 0 6pt;border-bottom:1px solid #999;padding-bottom:2pt;break-after:avoid}
+  #pdfdoc h3,#pdfdoc h4{font:700 12pt/1.2 Arial,sans-serif;margin:12pt 0 4pt;break-after:avoid}
+  #pdfdoc p{margin:0 0 7pt;orphans:3;widows:3}
+  #pdfdoc ul,#pdfdoc ol{margin:0 0 8pt;padding-left:20pt}
+  #pdfdoc li{margin:2pt 0;break-inside:avoid}
+  #pdfdoc table{border-collapse:collapse;width:100%;margin:6pt 0;font-size:10.5pt}
+  #pdfdoc td,#pdfdoc th{border:1px solid #888;padding:3pt 6pt;text-align:left;vertical-align:top}
+  #pdfdoc th{background:#e8e8e8}
+  #pdfdoc tr{break-inside:avoid}
+  #pdfdoc code{font-family:Consolas,monospace;font-size:.92em;background:#eee;padding:0 2pt}
+  .pd-brand{font:700 9pt Arial,sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#c2410c}
+  .pd-meta{font:9pt Arial,sans-serif;color:#555}
+  .pd-head{border-bottom:2px solid #111;padding-bottom:8pt;margin-bottom:10pt}
+  .pd-focus{border-left:3pt solid #c2410c;background:#f4f4f4;padding:5pt 8pt;margin:0 0 10pt;font-size:10.5pt}
+  .pd-map>li{margin:3pt 0}.pd-map ul{margin:1pt 0 3pt}
+}
+@media print{
+  .pd-q{break-inside:avoid;margin:0 0 12pt;padding-bottom:6pt;border-bottom:1px dotted #aaa}
+  .pd-qh{font:9pt Arial,sans-serif;color:#555;margin-bottom:3pt}.pd-qh b{font-size:12pt;color:#111}
+  .pd-tag{text-transform:uppercase;letter-spacing:.04em}
+  .pd-base{border:1px solid #bbb;background:#f6f6f6;padding:5pt 8pt;margin:3pt 0 5pt;font-size:10.5pt}
+  .pd-qt{margin:2pt 0 4pt}
+  .pd-a{padding-left:16pt;text-indent:-16pt;margin:2pt 0 2pt 0}.pd-a b{display:inline-block;width:16pt;text-indent:0}
+  .pd-break{break-before:page}
+  .pd-key td{text-align:center;font:11pt Arial,sans-serif;width:20%}
+  .pd-g{break-inside:avoid;margin:0 0 9pt;font-size:10.5pt}.pd-ge{margin:1pt 0 2pt}.pd-g ul{margin:2pt 0 0;font-size:10pt}
+}
+
 </style>
 <div class="wrap" id="app"></div>
 <nav class="nav" id="nav" aria-label="Navegação principal"></nav>
@@ -316,14 +352,14 @@ function blockTimes(n){
 function blkBtns(n,i,b){
   const a=(l,pri,x)=>`<button class="btn sm ${pri?'pri':''}" data-a="run" data-d="${n}" data-b="${i}" ${x||''}>${l}</button>`;
   switch(b.t){
-    case'aula':return (S.tutor?a('Iniciar aula guiada (Tutor)',1)+`<button class="btn sm" data-a="run" data-d="${n}" data-b="${i}" data-plain="1">Só ler a aula</button>`:a('Abrir aula',1))+`<button class="btn sm" data-a="pdf" data-t="${b.tp[0]}">Apostila</button>`;
-    case'ex':return a('Fazer '+(b.n||20)+' questões',1);
+    case'aula':return (S.tutor?a('Iniciar aula guiada (Tutor)',1)+`<button class="btn sm" data-a="run" data-d="${n}" data-b="${i}" data-plain="1">Só ler a aula</button>`:a('Abrir aula',1))+`<button class="btn sm" data-a="pdf" data-t="${b.tp[0]}">Apostila</button><button class="btn sm" data-a="pdfblk" data-d="${n}" data-b="${i}">Gerar PDF da aula</button>`;
+    case'ex':return a('Fazer '+(b.n||20)+' questões',1)+`<button class="btn sm" data-a="qpdf" data-d="${n}" data-b="${i}">PDF das questões</button>`;
     case'fl':return a('Cartões',1)+(b.tp.length===1?`<button class="btn sm" data-a="topicmap" data-t="${b.tp[0]}">Mapa mental</button>`:'');
     case'rev':return a(b.rv?'Fazer a revisão':b.tp.length===1?'Abrir tópico':'Escolher tópico',1);
-    case'sim':return a('Iniciar simulado',1);
+    case'sim':return a('Iniciar simulado',1)+`<button class="btn sm" data-a="qpdf" data-d="${n}" data-b="${i}">PDF das questões</button>`;
     case'an':return a('Ver última correção',1);
-    case'err':return a(`Caderno de erros (${Object.keys(S.err).length})`,1);
-    case'weak':return a('Treinar '+(b.n||20)+' questões',1);
+    case'err':return a(`Caderno de erros (${Object.keys(S.err).length})`,1)+`<button class="btn sm" data-a="qpdf" data-d="${n}" data-b="${i}">PDF das questões</button>`;
+    case'weak':return a('Treinar '+(b.n||20)+' questões',1)+`<button class="btn sm" data-a="qpdf" data-d="${n}" data-b="${i}">PDF das questões</button>`;
     case'revweak':return a('Ver tópicos fracos',1);
     default:return''}}
 function mism(n,day){const g=dayDate(n).getDay(),ok={u:g>=1&&g<=5,s:g===6,d:g===0}[day.k];return ok?'':`<div class="small" style="color:var(--warn)">Este dia do plano foi desenhado para ${{u:'um dia útil (2h)',s:'um sábado (4h)',d:'um domingo (revisão)'}[day.k]}. Sua data inicial não é segunda-feira: adapte o tempo disponível.</div>`}
@@ -420,7 +456,7 @@ function vTopic(t){
   return `<div class="stack"><div class="row"><button class="btn sm" data-a="back">‹ Tópicos</button><span class="chip ${d}">${DN[d]}</span>${x.s?`<span class="chip">${Math.round(x.acc*100)}% de acerto</span>`:''}</div>
   <div><h1 style="font-size:32px">${esc(T.n)}</h1></div><div>${seg}</div>${body}
   ${realBox(t)}
-  <div class="row"><button class="btn pri" data-a="tutorstart" data-t="${t}">Aula guiada (Tutor)</button><button class="btn" data-a="topicquiz" data-t="${t}">Fazer questões (${(D.byT[t]||[]).length})</button><button class="btn" data-a="cards" data-t="${t}">Flashcards</button></div></div>`}
+  <div class="row"><button class="btn pri" data-a="tutorstart" data-t="${t}">Aula guiada (Tutor)</button><button class="btn" data-a="topicquiz" data-t="${t}">Fazer questões (${(D.byT[t]||[]).length})</button><button class="btn" data-a="cards" data-t="${t}">Flashcards</button><button class="btn" data-a="pdft" data-t="${t}">Gerar PDF da aula</button><button class="btn" data-a="qpdft" data-t="${t}">PDF das questões</button></div></div>`}
 function realBox(t){const rs=realStat(t);if(!rs.a&&!rs.c)return'';return `<div class="card"><b>Caiu em provas reais</b><p class="small muted" style="margin:4px 0 8px">${rs.a?rs.a+' '+plural(rs.a,'questão','questões')+' na prova de 2022 (OGMO-ES)':''}${rs.a&&rs.c?' e ':''}${rs.c?rs.c+' na prova de 2006 (OGMO-Natal)':''}. Resolva as originais para sentir o nível da banca.</p><button class="btn sm" data-a="realtopic" data-t="${t}">Resolver as questões reais deste tópico</button></div>`}
 function topicMap(t){
   const T=D.T[t],d=t[0],col=`var(--${lc(d)})`;
@@ -839,6 +875,53 @@ function rvWrap(A){const r=A.rate,tr=A.trate,cb=A.copybk;
   A.trate=function(d){const U=ui.T,s=U&&U.steps[U.i],c=s&&s.card;tr(d);if(c){fdSet(c.k);save()}};
   A.copybk=function(d){cb(d);S.bk=todayKey();save()}}
 
+/* ---------- PDF DA AULA E DAS QUESTÕES (gerado na hora pela impressão do navegador; nada é salvo no app) ---------- */
+function printDoc(html,docTitle){
+  const old=document.getElementById('pdfdoc');if(old)old.remove();
+  const el=document.createElement('div');el.id='pdfdoc';el.innerHTML=html;document.body.appendChild(el);
+  const t0=document.title;document.title=docTitle;
+  document.body.classList.add('printing');
+  const done=()=>{document.body.classList.remove('printing');const e=document.getElementById('pdfdoc');if(e)e.remove();document.title=t0;window.removeEventListener('afterprint',done)};
+  window.addEventListener('afterprint',done);
+  toast('Na janela que abrir, escolha "Salvar como PDF".');
+  setTimeout(()=>{try{window.print()}catch(e){done();toast('Este navegador não abriu a impressão.')}},350);
+  setTimeout(done,120000)}
+const pdfDate=()=>new Date().toLocaleDateString('pt-BR');
+function pdfHTML(tp,foco){
+  const T=D.T[tp];
+  const fl=T.flashcards.map(f=>`<tr><td><b>${f.f}</b></td><td>${f.v}</td></tr>`).join('');
+  const mp=T.mapa.map(b=>`<li><b>${esc(b.l)}</b><ul>${b.c.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></li>`).join('');
+  return `<div class="pd-head"><div class="pd-brand">Rota OGMO 2027 · ${DN[tp[0]]}</div><h1>${esc(T.n)}</h1><div class="pd-meta">Tópico ${tp} · gerado em ${pdfDate()}</div></div>
+  ${foco?`<div class="pd-focus"><b>Foco desta aula:</b> ${esc(foco)}</div>`:''}
+  <div class="pd-body">${T.resumo}</div>
+  <h2>Dicas e pegadinhas de prova</h2><ul>${T.dicas.map(x=>`<li>${x}</li>`).join('')}</ul>
+  <h2>Mapa mental (em tópicos)</h2><ul class="pd-map">${mp}</ul>
+  <h2>Flashcards</h2><table class="pd-fl"><tr><th>Pergunta / termo</th><th>Resposta</th></tr>${fl}</table>`}
+function printTopic(tp,foco){const T=D.T[tp];if(!T){toast('Tópico não encontrado.');return}printDoc(pdfHTML(tp,foco),'Rota OGMO - '+tp+' '+T.n)}
+/* questões: folha de prova + gabarito comentado em páginas separadas */
+function qpdfHTML(title,list,sub){
+  const L='ABCD',tag=q=>`${DN[q.t[0]]} · ${q.t}${q.src?' · prova real '+esc(q.src):''}`;
+  const qs=list.map((q,i)=>`<div class="pd-q"><div class="pd-qh"><b>${i+1}.</b> <span class="pd-tag">${tag(q)}</span></div>${q.base?`<div class="pd-base">${q.base}</div>`:''}<div class="pd-qt">${q.txt}</div>${q.alt.map((a,k)=>`<div class="pd-a"><b>${L[k]})</b> ${a}</div>`).join('')}</div>`).join('');
+  const key=list.map((q,i)=>`<td><b>${i+1}</b> ${L[q.r]}</td>`);const rows=[];for(let i=0;i<key.length;i+=5)rows.push('<tr>'+key.slice(i,i+5).join('')+'</tr>');
+  const gs=list.map((q,i)=>`<div class="pd-g"><div><b>${i+1}. Resposta: ${L[q.r]})</b> ${q.alt[q.r]}</div><div class="pd-ge">${q.exp}</div>${q.expAlt?`<ul>${q.expAlt.map((e,k)=>`<li><b>${L[k]})</b> ${e}</li>`).join('')}</ul>`:''}${q.obs?`<div class="pd-meta"><b>Observação:</b> ${esc(q.obs)}</div>`:''}</div>`).join('');
+  return `<div class="pd-head"><div class="pd-brand">Rota OGMO 2027 · Questões</div><h1>${esc(title)}</h1><div class="pd-meta">${list.length} questões${sub?' · '+esc(sub):''} · gerado em ${pdfDate()}</div></div>${qs}
+  <div class="pd-break"><h2>Gabarito</h2><table class="pd-key">${rows.join('')}</table><h2>Correção comentada</h2>${gs}</div>`}
+function qcGet(k,f){const c=ui.qc&&ui.qc[k];if(c){delete ui.qc[k];return c}return f()}
+function qpdfBlock(n,i){
+  const b=D.SCH[n-1].b[i],key=n+'-'+i;let list;
+  if(b.t==='ex')list=exQ(b);else if(b.t==='sim')list=simQ(b);else if(b.t==='weak')list=weakQ(b.n||20);
+  else if(b.t==='err'){const ids=Object.keys(S.err).filter(id=>D.qid[id]);if(!ids.length){toast('Caderno de erros vazio. Bom sinal!');return}list=shuffle(ids.map(id=>D.qid[id])).slice(0,30)}
+  if(!list||!list.length){toast('Sem questões disponíveis.');return}
+  if(b.t!=='err'){ui.qc=ui.qc||{};ui.qc[key]=list}
+  const title=b.l.replace(/^(1ª|2ª) (matéria|parte) · /,'');
+  printDoc(qpdfHTML(title,list,'Dia '+n),'Rota OGMO - Questões - '+title)}
+const PA={
+  pdfblk(d){const b=D.SCH[+d.d-1].b[+d.b];if(b&&b.tp&&b.tp[0])printTopic(b.tp[0],b.s||b.l)},
+  pdft(d){printTopic(d.t,ui.focus&&ui.focus.tp===d.t?(ui.focus.foco||ui.focus.label):'')},
+  qpdf(d){qpdfBlock(+d.d,+d.b)},
+  qpdft(d){const T=D.T[d.t],list=pickQ(D.byT[d.t]||[],15,'new');if(!list.length){toast('Sem questões neste tópico.');return}printDoc(qpdfHTML(T.n,list,'tópico '+d.t),'Rota OGMO - Questões - '+d.t+' '+T.n)}
+};
+
 /* ---------- AÇÕES ---------- */
 function runBlock(n,i,plain){
   const b=D.SCH[n-1].b[i],ctx={d:n,b:i};
@@ -846,11 +929,11 @@ function runBlock(n,i,plain){
     case'aula':if(S.tutor&&!plain)startTutor(b.tp[0],ctx,b.s,b.of?{k:b.k,of:b.of}:partOf(b));else{ui.focus={tp:b.tp[0],foco:b.s,label:b.l};ui.tt='aula';go('t-'+b.tp[0])}break;
     case'rev':if(b.rv||b.tp.length>1){ui.revlist=b.tp;ui.revrv=b.rv||null;ui.revctx=ctx;go('rev')}else{ui.focus={tp:b.tp[0],foco:b.s,label:b.l};ui.tt='aula';go('t-'+b.tp[0])}break;
     case'fl':startCards(b.tp,ctx);break;
-    case'ex':startQuiz(exQ(b),{mode:'train',label:b.l.replace(/^(1ª|2ª) (matéria|parte) · /,''),ctx});break;
-    case'sim':{const mins=b.lim||Math.round((b.n||20)*2.5);startQuiz(simQ(b),{mode:'exam',label:b.l,limit:mins,ctx});break}
+    case'ex':startQuiz(qcGet(n+'-'+i,()=>exQ(b)),{mode:'train',label:b.l.replace(/^(1ª|2ª) (matéria|parte) · /,''),ctx});break;
+    case'sim':{const mins=b.lim||Math.round((b.n||20)*2.5);startQuiz(qcGet(n+'-'+i,()=>simQ(b)),{mode:'exam',label:b.l,limit:mins,ctx});break}
     case'an':if(S.last)go('res');else toast('Faça um simulado antes para ter o que corrigir.');break;
     case'err':startErr(ctx);break;
-    case'weak':startQuiz(weakQ(b.n||20),{mode:'train',label:'Pontos fracos',ctx});break;
+    case'weak':startQuiz(qcGet(n+'-'+i,()=>weakQ(b.n||20)),{mode:'train',label:'Pontos fracos',ctx});break;
     case'revweak':ui.revlist=weakTopics(3);ui.revrv=null;go('rev');break}}
 function partOf(b){const m=/parte (\d)\/(\d)/.exec(b.l);return m?{k:+m[1]-1,of:+m[2]}:null}
 function startTutor(tp,ctx,foco,part){ui.T=buildTutor(tp,ctx,foco,part);ui.T.rev=false;go('tutor')}
@@ -915,7 +998,7 @@ const A={
   resetask(){$('#resetbox').innerHTML='<p class="small" style="color:var(--bad)">Isto apaga todo o progresso, erros e histórico.</p><button class="btn sm" data-a="resetgo" style="border-color:var(--bad);color:var(--bad)">Sim, zerar tudo</button>'},
   resetgo(){S=defaults();save();A.closemodal();toast('Progresso zerado');go('hoje');render()}
 };
-Object.assign(A,QA,RA);rvWrap(A);
+Object.assign(A,QA,RA,PA);rvWrap(A);
 document.addEventListener('click',e=>{
   const el=e.target.closest('[data-a]');if(!el)return;
   const f=A[el.dataset.a];if(f){e.preventDefault();f(el.dataset,e)}
